@@ -1,0 +1,125 @@
+/* 401实验室 · 阳光清新主题 */
+:root {
+  --bg: #fffef7;
+  --panel: #ffffff;
+  --text: #2b2b2b;
+  --muted: #7a7a7a;
+  --accent: #ffcf5c;
+  --accent-strong: #ffa726;
+  --border: #f1e6c6;
+  --shadow: rgba(255, 185, 57, 0.35);
+  --success: #2e7d32;
+  --error: #c62828;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;
+  color: var(--text);
+  background: linear-gradient(180deg, #fffbe9 0%, var(--bg) 100%);
+}
+
+/* 页面容器 */
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 20px;
+}
+
+/* 英雄区 */
+.hero { text-align: center; margin-bottom: 24px; }
+.hero-mark {
+  display: inline-block;
+  background: var(--accent);
+  color: #5d4b00;
+  font-weight: 800;
+  letter-spacing: 2px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  box-shadow: 0 6px 18px var(--shadow);
+}
+.hero-title { font-size: 40px; margin: 12px 0 6px 0; }
+.hero-sub { color: var(--muted); }
+
+/* 卡片 */
+.card {
+  width: 100%;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 16px 40px var(--shadow);
+  overflow: hidden;
+}
+.card-header {
+  padding: 18px 24px;
+  background: linear-gradient(90deg, var(--accent-strong), var(--accent));
+  color: #fff;
+  font-weight: 700;
+}
+.card-body { padding: 24px; }
+
+/* 上传区 */
+.file-input-container { margin-bottom: 14px; }
+input#image-input { width: 0.1px; height: 0.1px; opacity: 0; position: absolute; z-index: -1; }
+.file-name { display: block; margin-top: 8px; color: var(--muted); font-style: italic; }
+.image-preview-container {
+  margin: 16px 0 18px 0; height: 280px; border: 2px dashed var(--accent);
+  border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #fffaf0;
+}
+#image-preview { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+/* 按钮 */
+.button {
+  display: inline-block; text-decoration: none; cursor: pointer; border: none; border-radius: 10px;
+  padding: 12px 20px; font-size: 16px; font-weight: 700; transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.button:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--shadow); }
+.button.primary { background: var(--accent-strong); color: #fff; }
+.button.secondary { background: #fff; color: var(--accent-strong); border: 2px solid var(--accent-strong); }
+.button.accent { background: var(--accent); color: #594200; }
+.button.chip { background: #fff7e0; color: #5d4b00; border: 1px solid var(--border); }
+
+/* 状态信息 */
+.status { margin-top: 12px; }
+.status-message { padding: 10px 12px; border-radius: 8px; margin-bottom: 10px; }
+.status-message.loading { background-color: #fff7e0; color: #5d4b00; border-left: 4px solid var(--accent); }
+.status-message.success { background-color: #f3fff3; color: var(--success); border-left: 4px solid var(--success); }
+.status-message.error { background-color: #fff2f2; color: var(--error); border-left: 4px solid var(--error); }
+.status-line a { color: var(--accent-strong); font-weight: 700; }
+
+/* 处理区 */
+.processing { margin-top: 18px; padding-top: 6px; }
+.section-title { color: #5d4b00; margin-bottom: 12px; text-align: center; }
+.processor-buttons { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.processed-preview { margin: 18px 0; text-align: center; }
+.processed-preview h3 { color: #5d4b00; margin-bottom: 10px; }
+#processed-preview { max-width: 100%; max-height: 320px; border: 2px solid var(--accent); border-radius: 12px; }
+
+/* 两列布局：上传在左，结果在右 */
+.two-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+  width: 100%;
+  max-width: 1280px;
+}
+
+/* 结果文本：更大字号与更舒适的行距 */
+.result-content {
+  font-size: 18px;
+  line-height: 1.7;
+  font-family: inherit;
+}
+
+@media (max-width: 768px) {
+  .page { padding: 28px 14px; }
+  .hero-title { font-size: 30px; }
+  .card-body { padding: 18px; }
+  .two-cols { grid-template-columns: 1fr; }
+  .result-content { font-size: 16px; }
+}
