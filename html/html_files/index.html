@@ -3,180 +3,110 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>图像处理实验台 | 401 LAB</title>
-  <link rel="stylesheet" href="/css_files/sunny.css"> <!-- 保留原有样式 -->
-  <link rel="icon" href="favicon.ico" type="image/x-icon"> <!-- 保留原有图标 -->
-  <style>
-    /* 适配 sunny.css 的排版与视觉 */
-    .image-preview {
-      border: 2px dashed var(--accent);
-      border-radius: 12px;
-      padding: 16px;
-      margin: 12px 0;
-      height: 280px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #fffaf0;
-    }
-    .image-preview img {
-      max-width: 100%;
-      max-height: 100%;
-      border-radius: 8px;
-      object-fit: contain;
-    }
-    .result-content {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      margin: 12px 0;
-      min-height: 300px;
-      background-color: #fffaf0;
-      white-space: pre-wrap;
-      font-family: inherit;
-      font-size: 18px;
-      line-height: 1.7;
-    }
-    .status-text {
-      color: var(--muted);
-      font-size: 14px;
-      margin: 8px 0;
-    }
-  </style>
+  <title>云平台</title>
+  <link rel="stylesheet" href="/css_files/sunny.css">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
-  <main class="page">
-    <div class="hero">
-      <span class="hero-mark">401 LAB</span>
-      <h1 class="hero-title">图像处理实验台</h1>
-      <p class="hero-sub">图像处理实验台</p>
+
+  <!-- 顶部状态栏 -->
+  <div class="header">
+    <div class="app-title">
+      <svg class="cloud-icon-anim" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+      </svg>
+      401 Cloud Platform
     </div>
+    <div class="status-tag">
+      <span class="status-dot"></span>
+      Cloud Server: Online
+    </div>
+  </div>
 
-    <div class="two-cols">
-      <!-- 左侧：上传与预览区域（保留原有禁用逻辑，补充自动加载） -->
-      <div class="card" id="upload">
-        <div class="card-header">相机拍摄图片</div>
-        <div class="card-body">
-          <form id="upload-form" onsubmit="return false;">
-            <div class="form-group">
-              <p class="status-text">请等待主机端图片推送</p>
-            </div>
-            <div class="image-preview" id="image-preview">
-              <img id="latest-image" src="" alt="等待相机拍摄图片..." style="display: none;">
-              <span id="image-placeholder">暂无拍摄图片</span>
-            </div>
-          </form>
-        </div>
+  <!-- 主容器 -->
+  <div class="main-container">
+    
+    <!-- 左侧：实时图像 -->
+    <div class="panel image-panel">
+      <div class="panel-header">
+        <span>实时监测画面</span>
+        <span id="timestamp" style="font-weight: normal; color: #666;">--:--:--</span>
       </div>
-
-      <!-- 右侧：处理结果区域 -->
-      <div class="card" id="result">
-        <div class="card-header">识别分拣结果</div>
-        <div class="card-body">
-          <div class="status-text" id="result-status">等待结果加载...</div>
-          <div class="result-content" id="result-content">
-            暂无结果数据
-          </div>
-        </div>
+      <div class="img-container">
+        <div class="live-badge" id="live-badge">LIVE</div>
+        <img id="latest-image" src="" alt="监控画面" style="display: none;">
+        <div class="placeholder" id="image-placeholder">等待推送图像...</div>
       </div>
     </div>
-  </main>
+
+    <!-- 右侧：分析数据 -->
+    <div class="panel data-panel">
+      <div class="panel-header">算法分析结果</div>
+      <div class="result-box" id="result-box">等待数据返回...</div>
+    </div>
+
+  </div>
 
   <script>
-    // 全局变量：记录当前最新图片名，避免重复请求
+    // 全局状态
     let currentImageFilename = '';
-    // 超时配置（120秒，和原有逻辑一致）
     const RESULT_POLL_TIMEOUT = 120 * 1000;
     let resultPollStartTime = null;
 
-    // 1. 获取最新图片并更新预览
+    // 1. 获取最新图片
     function fetchLatestImage() {
       fetch('/latest_image')
-        .then(response => {
-          if (!response.ok) throw new Error('接口请求失败');
-          return response.json();
-        })
+        .then(res => res.json())
         .then(data => {
-          const previewContainer = document.getElementById('image-preview');
-          const imgElement = document.getElementById('latest-image');
-          const placeholder = document.getElementById('image-placeholder');
-
           if (data.success && data.ready) {
-            // 有新图片时更新
+            document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
+            
             if (currentImageFilename !== data.filename) {
               currentImageFilename = data.filename;
-              // 显示图片，隐藏占位符
-              imgElement.src = `/uploads/${data.filename}?t=${new Date().getTime()}`; // 防缓存
-              imgElement.style.display = 'block';
-              placeholder.style.display = 'none';
-              // 重置结果超时，开始轮询结果
-              resultPollStartTime = new Date().getTime();
+              
+              const img = document.getElementById('latest-image');
+              img.src = `/uploads/${data.filename}?t=${Date.now()}`;
+              img.style.display = 'block';
+              document.getElementById('image-placeholder').style.display = 'none';
+              document.getElementById('live-badge').style.display = 'block';
+
+              // 开始轮询结果
+              resultPollStartTime = Date.now();
               fetchResult(data.filename);
+              
+              // 重置结果展示
+              document.getElementById('result-box').textContent = 'Analyzing...';
             }
-          } else {
-            // 无图片时显示占位符
-            imgElement.style.display = 'none';
-            placeholder.style.display = 'block';
-            placeholder.textContent = '暂无拍摄图片（等待主机端推送）';
-            // 清空结果
-            document.getElementById('result-status').textContent = '等待结果加载...';
-            document.getElementById('result-content').textContent = '暂无结果数据';
-            currentImageFilename = '';
           }
         })
-        .catch(err => {
-          console.error('获取最新图片失败：', err);
-          document.getElementById('image-placeholder').textContent = '图片加载失败，请检查后端服务';
-        });
+        .catch(console.error);
     }
 
-    // 2. 获取对应图片的处理结果
+    // 2. 获取结果
     function fetchResult(filename) {
-      // 检查超时
-      if (new Date().getTime() - resultPollStartTime > RESULT_POLL_TIMEOUT) {
-        document.getElementById('result-status').textContent = '结果加载超时（120秒）';
-        document.getElementById('result-status').style.color = '#e63946';
+      if (Date.now() - resultPollStartTime > RESULT_POLL_TIMEOUT) {
+        document.getElementById('result-box').textContent = "分析超时 / Analysis Timeout";
         return;
       }
 
       fetch(`/result?filename=${filename}`)
-        .then(response => {
-          if (!response.ok) throw new Error('结果接口请求失败');
-          return response.json();
-        })
+        .then(res => res.json())
         .then(data => {
-          const statusElement = document.getElementById('result-status');
-          const contentElement = document.getElementById('result-content');
-
           if (data.success && data.ready) {
-            // 结果就绪
-            statusElement.textContent = '结果加载成功';
-            statusElement.style.color = '#2a9d8f';
-            contentElement.textContent = data.content;
+            // 直接展示所有文本结果，不做解析
+            document.getElementById('result-box').textContent = data.content;
           } else {
-            // 结果处理中，继续轮询
-            statusElement.textContent = '结果处理中...';
-            statusElement.style.color = '#f4a261';
-            contentElement.textContent = '等待后端返回识别分拣结果...';
-            // 2秒后再次查询（和图片轮询频率一致）
-            setTimeout(() => fetchResult(filename), 2000);
+            setTimeout(() => fetchResult(filename), 1000);
           }
         })
-        .catch(err => {
-          console.error('获取结果失败：', err);
-          document.getElementById('result-status').textContent = '结果加载失败，请检查后端';
-          document.getElementById('result-status').style.color = '#e63946';
-        });
+        .catch(console.error);
     }
 
-    // 3. 启动轮询（每2秒刷新一次，和原有逻辑一致）
-    function startPolling() {
-      fetchLatestImage();
+    // 启动
+    window.onload = () => {
       setInterval(fetchLatestImage, 2000);
-    }
-
-    // 页面加载完成后启动轮询
-    window.onload = startPolling;
+      fetchLatestImage();
+    };
   </script>
 </body>
 </html>
