@@ -1,8 +1,14 @@
-Flask
-Werkzeug
-Pillow
-numpy
-opencv-python
-torch
-torchvision
-pyrealsense2
+# Environment: Python 3.10.12
+Flask==3.1.2
+Werkzeug==3.1.0
+Pillow==11.3.0
+numpy==1.26.4
+opencv-python==4.12.0.88
+pyrealsense2==2.56.5.9235
+watchdog==6.0.0
+
+# PyTorch (CPU version detected in environment)
+# To install CPU version specifically, use: 
+# pip install torch==2.2.0 torchvision==0.17.0 --index-url https://download.pytorch.org/whl/cpu
+torch==2.2.0
+torchvision==0.17.0
