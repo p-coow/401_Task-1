@@ -127,7 +127,7 @@ def _ensure_result_for(filename: str) -> None:
         app.logger.warning(f"源文件不存在: {src_path}")
         return
         
-    algo_path = os.path.join(BASE_DIR, 'model', 'getShapeVideo1.py')
+    algo_path = os.path.join(BASE_DIR, 'model', 'getShapeVideo2.py')
     if not os.path.exists(algo_path):
         app.logger.error(f"算法脚本不存在: {algo_path}")
         return
