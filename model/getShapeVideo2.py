@@ -20,27 +20,37 @@ def classify_number_logic(label_id):
 
 def preprocess_image(img):
     """
-    图片预处理：偏黑色部分转为纯白色，其余背景转为纯黑色（确保返回3通道BGR格式）
-    :param img: 输入彩色图像 (BGR格式)
-    :return: 预处理后的3通道BGR图像
+    【Linux 适配最终版】
+    输入：原本是黑字（深色字）
+    输出：黑底白字（模型要求的格式）
+    逻辑：使用 OTSU 自动寻找阈值 + 颜色反转
     """
     # 1. 转为灰度图
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
-    # 2. 设置黑色阈值
-    black_threshold = 80
+    # 2. 高斯模糊 (关键)
+    # 这一步是为了去除噪点，防止 OTSU 计算的阈值受干扰
+    # (5, 5) 是模糊核，必须是奇数
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     
-    # 3. 二值化处理（单通道）
-    height, width = gray.shape
-    binary_img = np.zeros((height, width), dtype=np.uint8)
-    binary_img[gray < black_threshold] = 255  # 偏黑色→白色
-    binary_img[gray >= black_threshold] = 0   # 背景→黑色
+    # 3. OTSU 二值化 + 颜色反转 (核心)
+    # threshold 设为 0，因为用了 THRESH_OTSU，OpenCV 会自动找最佳值覆盖掉它
+    # THRESH_BINARY_INV 作用：
+    #   - 图像中"暗"的像素（你的黑色数字） -> 变白 (255)
+    #   - 图像中"亮"的像素（你的背景）     -> 变黑 (0)
+    ret, binary_img = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     
-    # 4. 强制转为3通道BGR
-    preprocessed_img = np.stack((binary_img, binary_img, binary_img), axis=-1)
+    # 打印一下自动计算出的阈值，方便你调试观察
+    print(f"【调试】OTSU 自动计算的阈值为: {ret}")
+
+    # 4. 形态学膨胀 (可选，建议保留)
+    # 因为二值化后数字可能会变细，膨胀可以让字变粗，利于 YOLO 识别
+    # 如果你的数字本身就很粗，可以把 iterations 改为 0 或者注释掉
+    kernel = np.ones((3, 3), np.uint8)
+    dilated_img = cv2.dilate(binary_img, kernel, iterations=1)
     
-    # 验证通道数（调试用）
-    print(f"预处理后图像通道数：{preprocessed_img.shape[-1]}")  # 应该输出3
+    # 5. 强制转为 3通道 BGR (YOLO 格式要求)
+    preprocessed_img = cv2.cvtColor(dilated_img, cv2.COLOR_GRAY2BGR)
     
     return preprocessed_img
 
