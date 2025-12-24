@@ -14,9 +14,9 @@ def classify_number_logic(label_id):
     if digit == 0:
         return "零"
     elif digit % 2 == 0:
-        return "偶"
+        return "偶数"
     else:
-        return "奇"
+        return "奇数"
 
 def preprocess_image(img):
     """
@@ -70,6 +70,8 @@ def predict_and_classify_silent(image_path):
     # --- 图片预处理 ---
     print("正在进行图片预处理...")
     preprocessed_img = preprocess_image(img)
+    cv2.imwrite("debug.jpg", preprocessed_img)
+    print("down")
     
     # 额外验证：确保预处理后是3通道
     if len(preprocessed_img.shape) != 3 or preprocessed_img.shape[-1] != 3:
